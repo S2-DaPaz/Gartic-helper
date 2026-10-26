@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<title>fixture gartic</title>
+<!-- Reproduz o DOM e o empilhamento do gartic.io medidos numa partida real em 2026-10-26:
+     #canvas(relative) > #drawing(relative, z1)[canvas, canvas(absolute, z1)], button(z3), #hint(z2), #time(z1), #events(z1). -->
+<style>
+  body { margin: 0; font-family: sans-serif; }
+  #canvas { position: relative; margin: 40px 0 0 30px; max-width: 767px; }
+  #drawing { position: relative; z-index: 1; margin-left: 20px; }
+  #drawing canvas { display: block; width: 100%; height: auto; background: #fff; }
+  #drawing canvas.camada { position: absolute; z-index: 1; top: 0; left: 0; background: transparent; }
+  #canvas > button.ferramenta { position: absolute; z-index: 3; display: none; }
+  #hint { position: absolute; z-index: 2; top: 0; left: 20px; right: 0; display: flex; justify-content: space-between; }
+  #time { position: absolute; z-index: 1; bottom: 0; left: 20px; right: 0; height: 6px; background: #f5c242; }
+  #events { position: absolute; z-index: 1; top: 0; left: 0; }
+  #notification { position: absolute; z-index: 2; inset: 0; background: #fff; }
+</style>
+</head>
+<body>
+<div class="ctt">
+  <div id="canvas">
+    <div id="drawing"><canvas id="tela" width="767" height="448"></canvas><canvas class="camada" width="767" height="448"></canvas></div>
+    <button class="ferramenta"></button>
+    <div id="time"></div>
+    <div id="events"></div>
+  </div>
+</div>
+<script>
+  window.cliques = 0;
+  window.escolhida = null;
+  // o traço chega à camada de cima, como no jogo
+  document.querySelector("#drawing canvas.camada").addEventListener("mousedown", () => window.cliques++);
+
+  /** Gera os spans de letras de uma palavra, como o componente de dica do jogo. */
+  function letras(palavra, visivel) {
+    return palavra.split(" ").map((p) =>
+      '<div class="word">' + p.split("").map((l) => "<span>" + (visivel ? l : (l === "_" ? "" : l)) + "</span>").join("") + "</div>"
+    ).join("");
+  }
+  /** Tira #hint e #notification, voltando ao quadro vazio. */
+  function limpar() {
+    document.querySelectorAll("#hint, #notification").forEach((e) => e.remove());
+  }
+  /** Insere HTML logo depois do botão de ferramenta, onde o jogo põe #hint e #notification. */
+  function inserir(html) {
+    document.querySelector("#canvas > button.ferramenta").insertAdjacentHTML("afterend", html);
+  }
+  function estadoParado() { limpar(); }
+  function estadoEscolhendo(a, b) {
+    limpar();
+    inserir('<div id="notification" class="yourTurn"><h4>Sua vez</h4><div class="cttCenter"><div class="containerWords">' +
+      '<div class="word"><span>' + a + '</span><button class="btYellowBig" onclick="window.escolhida=0"><strong>Desenhar</strong></button></div>' +
+      '<div class="or">ou</div>' +
+      '<div class="word"><span>' + b + '</span><button class="btYellowBig" onclick="window.escolhida=1"><strong>Desenhar</strong></button></div>' +
+      "</div></div></div>");
+  }
+  function estadoDesenhando(palavra) {
+    limpar();
+    inserir('<div id="hint"><div><button>Dica</button><div class="">' + letras(palavra, true) + "</div><button>Pular</button></div></div>");
+  }
+  function estadoOutroDesenhando(mascara) {
+    limpar();
+    inserir('<div id="hint"><h4>Dica</h4><div><div class="line">' + letras(mascara, false) + "</div></div></div>");
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Gartic Helper</title>
+  <meta name="theme-color" content="#29d3b2" />
+  <style>
+    body{font-family:system-ui,Segoe UI,Roboto,Arial;margin:0;padding:20px;background:#0f1020;color:#fff}
+    .card{max-width:720px;margin:0 auto;background:#17183a;border-radius:16px;padding:18px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+    h1{margin:0 0 8px;font-size:22px}
+    p{opacity:.9;line-height:1.4}
+    .btn{display:inline-block;background:#29d3b2;color:#003b33;font-weight:800;border:0;border-radius:12px;padding:12px 14px;cursor:pointer}
+    .btn:active{transform:scale(.98)}
+    .input{width:100%;box-sizing:border-box;padding:10px;border-radius:12px;border:1px solid #2a2b5f;background:#0f1020;color:#fff}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    a{color:#61f7c4}
+    .small{font-size:13px;opacity:.85}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>✏️ Gartic Helper</h1>
+    <p>Na sua vez de desenhar, o helper busca uma imagem da palavra e a deixa clarinha por cima da tela, para você desenhar em cima.</p>
+
+    <div class="row">
+      <button class="btn" id="copy">Copiar bookmarklet</button>
+      <span class="small" id="status"></span>
+    </div>
+
+    <p class="small">Depois de copiar, crie/edite um favorito no navegador e cole no campo URL.</p>
+
+    <h3 style="margin-top:16px">Bookmarklet</h3>
+    <input class="input" id="bm" readonly />
+
+    <h3 style="margin-top:16px">Como usar</h3>
+    <ol class="small">
+      <li>Abra <a href="https://gartic.io" target="_blank">gartic.io</a> e entre em uma sala</li>
+      <li>Abra seus favoritos e toque no favorito “Gartic Helper”</li>
+      <li>A bolinha ✏️ aparece no canto. Na sua vez, o painel mostra as imagens das duas palavras</li>
+      <li>Ao escolher, a imagem aparece por cima da tela. Toque na bolinha para trocar a imagem, a opacidade ou o tamanho</li>
+    </ol>
+    <p class="small">Não use em salas públicas: estraga a partida de quem joga com você.</p>
+  </div>
+
+  <script>
+    // Pergunta ao GitHub qual e o ultimo commit da main e carrega esse commit pelo
+    // jsDelivr. O "@main" do jsDelivr pode ficar horas desatualizado; um commit
+    // especifico nunca fica. Se a API do GitHub falhar, usa "@main" mesmo.
+    const repo = "S2-DaPaz/Gartic-helper";
+    const bookmarklet = `javascript:(()=>{const R='${repo}',L=v=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/gh/'+R+'@'+v+'/helper.js';document.body.appendChild(s)};fetch('https://api.github.com/repos/'+R+'/commits/main').then(r=>r.json()).then(c=>L(c&&c.sha||'main')).catch(()=>L('main'))})();`;
+
+    const bmInput = document.getElementById('bm');
+    bmInput.value = bookmarklet;
+
+    document.getElementById('copy').onclick = async () => {
+      try {
+        await navigator.clipboard.writeText(bookmarklet);
+        document.getElementById('status').textContent = '✅ Copiado!';
+        setTimeout(()=>document.getElementById('status').textContent='',1500);
+      } catch (e) {
+        bmInput.focus();
+        bmInput.select();
+        document.getElementById('status').textContent = '⚠️ Se não copiar, selecione e copie manualmente.';
+      }
+    };
+  </script>
+</body>
+</html>
